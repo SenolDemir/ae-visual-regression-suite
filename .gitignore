@@ -1,0 +1,21 @@
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+
+# Playwright MCP
+.playwright-mcp/
+
+/reports/
+
+.DS_Store
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/mcp.json
+
+
