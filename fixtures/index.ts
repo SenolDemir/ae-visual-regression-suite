@@ -1,12 +1,11 @@
 import { expect } from "@playwright/test";
-import { test as base} from "@playwright/test";
+import { test as base } from "@playwright/test";
 import { HomePage } from "../pages/HomePage";
 import { SignupPage } from "../pages/SignupPage";
 import { AccountSetupPage } from "../pages/AccountSetupPage";
 import { LoginPage } from "../pages/LoginPage";
 // import { ProductPage } from "../pages/ProductPage";
 // import { ProductDetailPage } from "../pages/ProductDetailPage";
-
 
 type Fixtures = {
   signupPage: SignupPage;
@@ -18,8 +17,8 @@ type Fixtures = {
 export const test = base.extend<Fixtures>({
   // implementing custom fixtures
 
-  signupPage: async ({page}, use) => {
-   const signupPage = new SignupPage(page);
+  signupPage: async ({ page }, use) => {
+    const signupPage = new SignupPage(page);
     await use(signupPage);
   },
 
@@ -47,5 +46,3 @@ export const test = base.extend<Fixtures>({
 });
 
 export { expect } from "@playwright/test";
-
-

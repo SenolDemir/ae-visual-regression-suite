@@ -1,12 +1,9 @@
-import { BasePage } from "./BasePage.js";
+import { BasePage } from "./BasePage";
 import type { Locator } from "@playwright/test";
 import { expect } from "@playwright/test";
 
 
-export class SignupPage extends BasePage {
-
-
-
+export class LoginPage extends BasePage {
 
 
 
