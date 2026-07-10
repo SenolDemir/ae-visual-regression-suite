@@ -3,11 +3,14 @@ import type { Locator } from "@playwright/test";
 import { expect } from "@playwright/test";
 
 export class HomePage extends BasePage {
-  // Locators
+
+  // ------------------- Locators -----------------------------------------------
+  
   public readonly logo: Locator = this.page.getByRole("img", {
     name: "Website for automation practice",
   });
 
+  // Locators for the active carousel item
   private readonly activeCarouselItem: Locator = this.page.locator(".item.active");
   public readonly heroHeading: Locator = this.activeCarouselItem.getByRole("heading", {
     name: /automation.*exercise/i,

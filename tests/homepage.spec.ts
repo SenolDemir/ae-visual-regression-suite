@@ -49,6 +49,14 @@ test.describe("Homepage visual regression tests", () => {
     await expect(logo).toHaveScreenshot("homepage-logo.png");
   });
 
+  test("test for entire web page", async ({ page }) => {
+    await expect(page).toHaveScreenshot("homepage-full.png", {
+      fullPage: true,
+      maxDiffPixelRatio: 0.2, 
+      animations: "disabled", // disable animations for the screenshot comparison
+    });
+  });
+
   test("home page with advanced options", async ({ page, homePage }) => {
     await expect(page).toHaveScreenshot("homepage.png", {
       maxDiffPixels: 100, // allow maximum 100 pixel differences.
@@ -61,4 +69,6 @@ test.describe("Homepage visual regression tests", () => {
       animations: "disabled", // disable animations for the screenshot comparison
     });
   });
+
+
 });
