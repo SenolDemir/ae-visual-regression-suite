@@ -1,11 +1,10 @@
-import { BasePage } from "./BasePage";
+import { BasePage } from "./base.page";
 import type { Locator } from "@playwright/test";
 import { expect } from "@playwright/test";
 
 export class HomePage extends BasePage {
-
   // ------------------- Locators -----------------------------------------------
-  
+
   public readonly logo: Locator = this.page.getByRole("img", {
     name: "Website for automation practice",
   });
@@ -21,7 +20,4 @@ export class HomePage extends BasePage {
   public readonly testCasesLink: Locator = this.activeCarouselItem.getByRole("link", { name: /test cases/i });
   public readonly apiListLink: Locator = this.activeCarouselItem.getByRole("link", { name: /apis list for practice/i });
   public readonly heroBannerImage: Locator = this.activeCarouselItem.getByAltText("demo website for practice");
-
-
-  
 }

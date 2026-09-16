@@ -1,4 +1,4 @@
-import { test, expect } from "../fixtures/index";
+import { test, expect } from "../fixtures/visual.fixtures";
 import { chromium, firefox, webkit } from "playwright";
 
 /**
@@ -28,8 +28,9 @@ test("home page cross-browsertest 1", async () => {
   for (const [name, engine] of Object.entries(engines)) {
     const browser = await engine.launch();
     const page = await browser.newPage();
+    page.context().setBaseURL("https://www.automationexercise.com");
 
-    await page.goto("https://www.automationexercise.com/");
+    await page.goto("/");
     expect(await page.title()).toBe("Automation Exercise");
 
     // Dismiss GDPR consent overlay if present before asserting layout
@@ -47,7 +48,7 @@ test("home page cross-browsertest 1", async () => {
 });
 
 test("home page cross-browsertest 2", async ({ page, browserName }) => {
-  await page.goto("https://www.automationexercise.com/");
+  await page.goto("/");
   expect(await page.title()).toBe("Automation Exercise");
 
   // Dismiss GDPR consent overlay if present before asserting layout
@@ -60,4 +61,3 @@ test("home page cross-browsertest 2", async ({ page, browserName }) => {
   await page.waitForFunction(() => document.fonts.ready);
   await page.screenshot({ path: `screenshots/homepage-${browserName}.png`, fullPage: true });
 });
-

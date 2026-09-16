@@ -2,7 +2,7 @@
 import { test, expect } from "@playwright/test";
 
 test("no horizontal overflow on any element", async ({ page }) => {
-  await page.goto("https://www.automationexercise.com/");
+  await page.goto("/");
   expect(await page.title()).toBe("Automation Exercise");
 
   const overflowingElements = await page.evaluate(() => {

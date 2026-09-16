@@ -1,5 +1,4 @@
-
-import { test, expect } from "../fixtures/index";
+import { test, expect } from "../fixtures/visual.fixtures";
 
 const viewports = [
   { name: "mobile", width: 375, height: 812 },
@@ -10,7 +9,7 @@ const viewports = [
 for (const vp of viewports) {
   test(`homepage layout @ ${vp.name} (${vp.width}x${vp.height})`, async ({ page }) => {
     await page.setViewportSize({ width: vp.width, height: vp.height });
-    await page.goto("https://www.automationexercise.com/");
+    await page.goto("/");
     expect(await page.title()).toBe("Automation Exercise");
 
     // Dismiss GDPR consent overlay if present before asserting layout

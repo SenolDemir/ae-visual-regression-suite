@@ -1,5 +1,22 @@
 
 
+/**
+ ** toHaveScreenshot() — purpose-built for visual/screenshot testing
+ * it has as screenshot-specific options built in:
+ * maxDiffPixels,
+ * threshold,
+ * mask,
+ * animations: 'disabled',
+ * fullPage,
+ * clip,
+ * stylePath
+ *
+ ** toMatchSnapshot() - generic snapshot assertion
+ * Works with any serializable data: buffers, strings, JSON — not just images
+ * If used for images, you have to pass a Buffer yourself (e.g. from page.screenshot())
+ * rather than getting Playwright's built-in comparison pipeline.
+ */
+
 ### Ad & Consent Overlay Handling
 
 Since automationexercise.com serves third-party ads and a GDPR consent overlay, both are neutralized in test setup to keep visual snapshots deterministic:
