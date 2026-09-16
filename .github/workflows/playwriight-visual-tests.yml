@@ -1,0 +1,70 @@
+name: Playwright Visual Regression Tests
+
+on:
+      push:
+            branches: [main, develop]
+      pull_request:
+            branches: [main, develop]
+
+jobs:
+      test:
+            timeout-minutes: 60
+            runs-on: ubuntu-latest
+            strategy:
+                  fail-fast: false
+                  matrix:
+                        browser: [chromium, firefox, webkit]
+
+            steps:
+                  - name: Checkout code
+                    uses: actions/checkout@v4
+
+                  - name: Setup Node.js
+                    uses: actions/setup-node@v4
+                    with:
+                          node-version: lts/*
+                          cache: "npm"
+
+                  - name: Install dependencies
+                    run: npm ci
+
+                  - name: Install Playwright browsers
+                    run: npx playwright install --with-deps
+
+                  - name: Run visual regression tests
+                    run: npm test
+                    env:
+                          BROWSER: ${{ matrix.browser }}
+
+                  - name: Upload test results
+                    if: always()
+                    uses: actions/upload-artifact@v4
+                    with:
+                          name: playwright-report-${{ matrix.browser }}
+                          path: playwright-report/
+                          retention-days: 30
+
+                  - name: Upload screenshots
+                    if: always()
+                    uses: actions/upload-artifact@v4
+                    with:
+                          name: screenshots-${{ matrix.browser }}
+                          path: screenshots/
+                          retention-days: 30
+
+                  - name: Upload test results (detailed)
+                    if: always()
+                    uses: actions/upload-artifact@v4
+                    with:
+                          name: test-results-${{ matrix.browser }}
+                          path: test-results/
+                          retention-days: 30
+
+                  - name: Publish test report
+                    if: always()
+                    uses: dorny/test-reporter@v1
+                    with:
+                          name: Playwright Results (${{ matrix.browser }})
+                          path: "playwright-report/index.html"
+                          reporter: "java-junit"
+                          fail-on-error: false

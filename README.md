@@ -23,13 +23,11 @@ A Playwright + TypeScript visual regression test suite targeting [automationexer
 ```
 ae-visual-regression-suite/
 ├── fixtures/
-│   └── index.ts                  # Custom test fixtures (page objects injected via Playwright's extend)
+│   └── visual.fixtures.ts        # Custom test fixtures (page objects injected via Playwright's extend)
 ├── pages/
-│   ├── BasePage.ts               # Base class shared by all page objects
-│   ├── HomePage.ts               # Locators for the Automation Exercise homepage
-│   ├── LoginPage.ts              
-│   ├── SignupPage.ts             
-│   └── AccountSetupPage.ts      
+│   ├── base.page.ts              # Base class shared by all page objects
+│   ├── home.page.ts              # Locators for the Automation Exercise homepage
+│   └── login.page.ts             # Locators for the login page
 ├── tests/
 │   ├── homepage.spec.ts          # Visual regression tests with various diff-tolerance options
 │   ├── responsive.spec.ts        # Per-viewport layout screenshots (mobile / tablet / desktop)
@@ -158,19 +156,21 @@ All page classes extend `BasePage`, which holds the injected Playwright `Page` i
 
 ```
 BasePage
-├── HomePage         (logo, hero heading, nav links, carousel locators)
-├── LoginPage        (stub)
-├── SignupPage       (stub)
-└── AccountSetupPage (stub)
+├── HomePage    (logo, hero heading, nav links, carousel locators)
+└── LoginPage   (login form locators)
 ```
 
 ### Custom Fixtures
 
-`fixtures/index.ts` extends Playwright's base `test` object with lazily-instantiated page objects:
+`fixtures/visual.fixtures.ts` extends Playwright's base `test` object with:
+- **Ad blocking** — routes ad-related domains (doubleclick, googlesyndication, etc.) and aborts them to prevent layout shifts
+- **Consent handling** — automatically detects and dismisses the consent button on initial page load
+- **Font readiness** — waits for `document.fonts.ready` before tests execute to ensure stable typography in visual comparisons
+- **Page objects** — lazily-instantiated fixtures for `homePage` and `loginPage`
 
 ```typescript
-import { test, expect } from "../fixtures/index";
-// now `homePage`, `loginPage`, `signupPage`, `accountSetupPage`
+import { test, expect } from "../fixtures/visual.fixtures";
+// now `homePage` and `loginPage`
 // are available as typed fixture arguments in every test
 ```
 
