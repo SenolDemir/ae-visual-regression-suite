@@ -11,7 +11,6 @@ type Fixtures = {
 };
 
 export const test = base.extend<Fixtures>({
-  // implementing custom fixtures
   // Override built-in `page`: block ads, navigate, dismiss consent —
   // every test that uses `page` (directly or via a POM fixture) gets this for free.
   page: async ({ page }, use) => {

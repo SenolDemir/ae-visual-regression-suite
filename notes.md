@@ -1,5 +1,6 @@
 
 
+
 /**
  ** toHaveScreenshot() — purpose-built for visual/screenshot testing
  * it has as screenshot-specific options built in:

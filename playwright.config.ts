@@ -21,12 +21,12 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   ...(process.env.CI ? { workers: 1 } : {}),
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: "html",
+  reporter: [["html"], ["github"]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL: process.env.BASE_URL || "https://www.automationexercise.com",
-    
-    headless: false,
+
+    headless: process.env.CI ? true : false,
     trace: "on-first-retry",
     actionTimeout: 30_000,
     navigationTimeout: 30_000,
