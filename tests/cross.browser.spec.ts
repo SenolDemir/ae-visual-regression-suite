@@ -21,6 +21,7 @@ import { chromium, firefox, webkit } from "playwright";
 // both tests are doing the same thing, but second one is more elegant and readable
 // to run the second test, you need to run the test with --project=chromium, --project=firefox, --project=webkit
 // script --> npx playwright test cross.browser.spec.ts --grep "cross-browsertest 2"
+
 test("home page cross-browsertest 1", async () => {
   const engines = { chromium, firefox, webkit };
 

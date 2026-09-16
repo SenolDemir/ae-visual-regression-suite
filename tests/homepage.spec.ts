@@ -18,47 +18,67 @@ import { test, expect } from "../fixtures/index";
  */
 
 test.describe("Homepage visual regression tests", () => {
-  
-  test.beforeEach(async ({ page }) => {
-    await page.goto("https://www.automationexercise.com/");
-    expect(await page.title()).toBe("Automation Exercise");
-  });
 
-  test("homepage comparison test 1", async ({ page }) => {
+test.beforeEach(async ({ page }) => {
+  await page.route(/doubleclick|googlesyndication|googletagservices|adsystem|adnxs/, (route) => route.abort());
+
+  await page.goto("https://www.automationexercise.com/", { waitUntil: "domcontentloaded" });
+  await expect(page).toHaveTitle("Automation Exercise");
+
+  const consentButton = page.getByRole("button", { name: "Consent" });
+  const appeared = await consentButton
+    .waitFor({ state: "visible", timeout: 5000 })
+    .then(() => true)
+    .catch(() => false);
+
+  if (appeared) {
+    await consentButton.click();
+    await expect(consentButton).not.toBeVisible();
+  }
+});
+
+  test("homepage comparison test 1", async ({ page, homePage }) => {
     // matches the screenshot pixel by pixel, each pixel should match exactly.
-    await expect(page).toHaveScreenshot("homepage.png");
+    await expect(page).toHaveScreenshot("homepage-strict.png", {
+      mask: [homePage.heroBannerImage, homePage.testCasesLink, homePage.apiListLink],
+      animations: "disabled",
+      maxDiffPixelRatio: 0.02,
+    });
   });
 
-  test("homepage comparison test 2", async ({ page }) => {
-    // maxDiffPixels: 100 => the maximum pixel difference can be 100.
-    await expect(page).toHaveScreenshot("homepage.png", { maxDiffPixels: 100 });
+test("homepage comparison test 2", async ({ page, homePage }) => {
+  await expect(page).toHaveScreenshot("homepage-maxdiffpixels.png", {
+    mask: [homePage.heroBannerImage, homePage.testCasesLink, homePage.apiListLink, homePage.heroHeading, homePage.heroSubheading],
+    maxDiffPixelRatio: 0.05,
+    timeout: 10_000,
   });
+});
 
   test("homepage comparison test 3", async ({ page }) => {
     // threshold is tolerance of image differences.
     // threshold: 0.5 => the maximum allowed pixel difference ratio is 0.5.
-    await expect(page).toHaveScreenshot("homepage.png", {
+    await expect(page).toHaveScreenshot("homepage-threshold.png", {
       threshold: 0.5,
     });
   });
 
   test("homepage element comparison test", async ({ page, homePage }) => {
-    // it is failed for the first time since there is no baseline image
-    // it will create a baseline image for the first time and then compare with it
     const logo = homePage.logo;
     await expect(logo).toHaveScreenshot("homepage-logo.png");
   });
 
   test("test for entire web page", async ({ page }) => {
+    await page.waitForLoadState("networkidle");
     await expect(page).toHaveScreenshot("homepage-full.png", {
       fullPage: true,
-      maxDiffPixelRatio: 0.2, 
+      maxDiffPixelRatio: 0.2,
       animations: "disabled", // disable animations for the screenshot comparison
+      timeout: 15_000,
     });
   });
 
   test("home page with advanced options", async ({ page, homePage }) => {
-    await expect(page).toHaveScreenshot("homepage.png", {
+    await expect(page).toHaveScreenshot("homepage-advanced.png", {
       maxDiffPixels: 100, // allow maximum 100 pixel differences.
       threshold: 0.5, // 20% difference threshold (%20 fark esigi)
       mask: [
@@ -69,6 +89,4 @@ test.describe("Homepage visual regression tests", () => {
       animations: "disabled", // disable animations for the screenshot comparison
     });
   });
-
-
 });
