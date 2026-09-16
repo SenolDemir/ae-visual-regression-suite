@@ -1,14 +1,1 @@
-{
-  "[yaml]": {
-    "editor.tabSize": 1,
-    "editor.insertSpaces": true,
-    "editor.formatOnSave": true
-  },
-  "[yml]": {
-    "editor.tabSize": 1,
-    "editor.insertSpaces": true,
-    "editor.formatOnSave": true
-  },
-  "yaml.format.indent": 1,
-  "yaml.format.printWidth": 120
-}
+
