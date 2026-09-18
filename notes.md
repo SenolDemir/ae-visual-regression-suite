@@ -2,6 +2,8 @@
   TODO
   - timeout settings in playwrigh.config.ts and maybe in some tests, those are needed or not?
   - Publishing report in Github Pages
+  - General eveluation
+  - How to provide baseline snapshots
 
 /**
  ** toHaveScreenshot() — purpose-built for visual/screenshot testing
@@ -40,3 +42,6 @@ Timestamps / relative dates ("2 minutes ago", live clocks)
 Randomized or personalized content — "recommended for you," A/B test variants, randomized testimonials
 Web fonts loading asynchronously — causes text reflow if a screenshot fires before fonts settle (Playwright does handle this reasonably well by default, waiting for fonts)
 Animations/transitions — caught mid-frame if not disabled
+
+
+

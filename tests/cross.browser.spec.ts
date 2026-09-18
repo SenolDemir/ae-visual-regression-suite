@@ -1,5 +1,4 @@
-import { test, expect } from "../fixtures/visual.fixtures";
-import { chromium, firefox, webkit } from "playwright";
+import { chromium, firefox, webkit, expect, test } from "@playwright/test";
 
 /**
  * This test demonstrates cross-browser testing using Playwright.
@@ -22,28 +21,46 @@ import { chromium, firefox, webkit } from "playwright";
 // to run the second test, you need to run the test with --project=chromium, --project=firefox, --project=webkit
 // script --> npx playwright test cross.browser.spec.ts --grep "cross-browsertest 2"
 
-test("home page cross-browsertest 1", async () => {
-  const engines = { chromium, firefox, webkit };
+test("home page cross-browser test 1", async () => {
+  const engines = [
+    { name: "chromium", launcher: chromium },
+    { name: "firefox", launcher: firefox },
+    { name: "webkit", launcher: webkit },
+  ];
 
-  for (const [name, engine] of Object.entries(engines)) {
-    const browser = await engine.launch();
-    const page = await browser.newPage();
-    page.context().setBaseURL("https://www.automationexercise.com");
+  for (const { name, launcher } of engines) {
+    const browser = await launcher.launch();
 
-    await page.goto("/");
-    expect(await page.title()).toBe("Automation Exercise");
+    try {
+      const context = await browser.newContext({
+        baseURL: "https://www.automationexercise.com",
+      });
+      const page = await context.newPage();
 
-    // Dismiss GDPR consent overlay if present before asserting layout
-    const consentButton = page.getByRole("button", { name: "Consent" });
-    if (await consentButton.isVisible({ timeout: 5000 }).catch(() => false)) {
-      await consentButton.click();
-      await expect(consentButton).not.toBeVisible();
+      await page.goto("/");
+      expect(await page.title()).toBe("Automation Exercise");
+
+      // Dismiss GDPR consent overlay if present before asserting layout
+      const consentButton = page.getByRole("button", { name: "Consent" });
+      const appeared = await consentButton
+        .waitFor({ state: "visible", timeout: 5000 })
+        .then(() => true)
+        .catch(() => false);
+
+      if (appeared) {
+        await consentButton.click();
+        await expect(consentButton).not.toBeVisible();
+      }
+
+      await page.waitForFunction(() => document.fonts.ready);
+
+      await page.screenshot({
+        path: `screenshots/homepage-${name}.png`,
+        fullPage: true,
+      });
+    } finally {
+      await browser.close();
     }
-
-    await page.waitForFunction(() => document.fonts.ready);
-
-    await page.screenshot({ path: `screenshots/homepage-${name}.png`, fullPage: true });
-    await browser.close();
   }
 });
 
