@@ -4,7 +4,6 @@ test.describe("Homepage visual regression tests", () => {
   test("homepage comparison test 1", async ({ page, homePage }) => {
     // matches the screenshot pixel by pixel, each pixel should match exactly.
     await expect(page).toHaveScreenshot("homepage-strict.png", {
-      mask: [homePage.heroBannerImage, homePage.testCasesLink, homePage.apiListLink],
       animations: "disabled",
       maxDiffPixelRatio: 0.02,
     });
@@ -35,7 +34,6 @@ test.describe("Homepage visual regression tests", () => {
       fullPage: true,
       maxDiffPixelRatio: 0.2,
       animations: "disabled", // disable animations for the screenshot comparison
-      timeout: 15_000,
     });
   });
 

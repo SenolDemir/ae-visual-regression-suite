@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write   # required so the workflow can push commits back to the repo
+  contents: write  
 
 jobs:
   update-baselines:
@@ -29,7 +29,7 @@ jobs:
 
       - name: Regenerate baseline snapshots
         run: npx playwright test --update-snapshots
-        continue-on-error: true   # don't let a genuine test failure block the commit step
+        continue-on-error: true   # to prevent test failure from blocking the commit step
 
       - name: Commit updated baselines
         if: always()   # run even if the previous step reported failure
@@ -37,3 +37,4 @@ jobs:
         with:
           commit_message: "chore: update visual regression baselines"
           file_pattern: "**/*-snapshots/**/*.png"
+          disable_globbing: true
