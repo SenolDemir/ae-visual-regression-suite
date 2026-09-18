@@ -35,6 +35,6 @@ jobs:
         if: always()   # run even if the previous step reported failure
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: update visual regression baselines"
-          file_pattern: "**/*-snapshots/**/*.png"
+          commit_message: "test: update visual baselines"
+          file_pattern: "tests/**/*.png"
           disable_globbing: true

@@ -12,11 +12,8 @@ node_modules/
 
 /reports/
 
-# Screenshots
-screenshots/*.png
-screenshots/*.jpg
-screenshots/*.jpeg
-screenshots/*.webp
+
+
 
 .DS_Store
 

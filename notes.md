@@ -1,9 +1,7 @@
 
   TODO
-  - timeout settings in playwrigh.config.ts and maybe in some tests, those are needed or not?
   - Publishing report in Github Pages
-  - General eveluation
-  - How to provide baseline snapshots
+ 
 
 /**
  ** toHaveScreenshot() — purpose-built for visual/screenshot testing
