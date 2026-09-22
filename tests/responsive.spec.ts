@@ -1,5 +1,16 @@
 import { test, expect } from "../fixtures/visual.fixtures";
 
+/**
+ * Responsive layout tests for the homepage.
+ * These tests verify the appearance and layout of the homepage across different viewport sizes:
+ * - mobile
+ * - tablet
+ * - desktop
+ *
+ * The goal is to ensure the homepage layout adapts correctly 
+ * to various screen sizes and resolutions.
+ */
+
 const viewports = [
   { name: "mobile", width: 375, height: 812 },
   { name: "tablet", width: 768, height: 1024 },

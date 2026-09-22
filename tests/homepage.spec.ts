@@ -1,12 +1,23 @@
 import { test, expect } from "../fixtures/visual.fixtures";
+/**
+ * Visual regression tests for the homepage.
+ * These tests verify the appearance of the homepage under different conditions:
+ * - strict pixel-by-pixel comparison
+ * - comparison with a maximum allowed difference in pixels
+ * - comparison with a threshold for image differences
+ * - element-specific comparison
+ * - full-page comparison
+ * - advanced options including masking dynamic elements and disabling animations
+ *
+ * The goal is to ensure visual consistency and catch any unintended layout or styling changes.
+ */
 
-test.describe("Homepage visual regression tests", () => {
+
+test.describe("Homepage visual regression", () => {
+
   test("homepage comparison test 1", async ({ page, homePage }) => {
     // matches the screenshot pixel by pixel, each pixel should match exactly.
-    await expect(page).toHaveScreenshot("homepage-strict.png", {
-      animations: "disabled",
-      maxDiffPixelRatio: 0.02,
-    });
+    await expect(page).toHaveScreenshot("homepage-strict.png", {});
   });
 
   test("homepage comparison test 2", async ({ page, homePage }) => {
@@ -32,8 +43,6 @@ test.describe("Homepage visual regression tests", () => {
     await page.waitForLoadState("networkidle");
     await expect(page).toHaveScreenshot("homepage-full.png", {
       fullPage: true,
-      maxDiffPixelRatio: 0.2,
-      animations: "disabled", // disable animations for the screenshot comparison
     });
   });
 

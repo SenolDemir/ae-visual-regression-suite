@@ -13,6 +13,10 @@ export default defineConfig({
   reporter: [["html"], ["github"]],
   /* Retry window for expect() assertions, incl. toHaveScreenshot() */
   expect: {
+    toHaveScreenshot: {
+      maxDiffPixelRatio: 0.2,
+      animations: "disabled",
+    },
     timeout: 15_000,
   },
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */

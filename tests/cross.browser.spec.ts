@@ -1,7 +1,6 @@
 import { chromium, firefox, webkit, expect, test } from "@playwright/test";
 
 /**
- * This test demonstrates cross-browser testing using Playwright.
  * Classically used function toHaveScreenShot() is not used here,
  * instead page.screenshot() is used to capture screenshots for each browser.
  * The reason is we are using different browsers
@@ -12,14 +11,16 @@ import { chromium, firefox, webkit, expect, test } from "@playwright/test";
  * - this is browser-agnostic functional check
  * - ensures scrolled-off content is captured,
  * where layout differences between engines are most visible
+ * 
+ * there is 2 test in same purpose,
+ * - first is using for loop to launch each browser and capture screenshot
+ * - second is using test fixture to launch each browser and capture screenshot
+ * - both tests are doing the same thing, but second one is more elegant and readable
+ * - to run the second test, you need to run the test with --project=chromium, --project=firefox, --project=webkit
+ * - script --> npx playwright test cross.browser.spec.ts --grep "cross-browsertest 2"
  */
 
-// there is 2 test in same purpose,
-// first is using for loop to launch each browser and capture screenshot
-// second is using test fixture to launch each browser and capture screenshot
-// both tests are doing the same thing, but second one is more elegant and readable
-// to run the second test, you need to run the test with --project=chromium, --project=firefox, --project=webkit
-// script --> npx playwright test cross.browser.spec.ts --grep "cross-browsertest 2"
+
 
 test("home page cross-browser test 1", async () => {
   const engines = [

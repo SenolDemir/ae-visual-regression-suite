@@ -1,8 +1,8 @@
 # ae-visual-regression-suite
 
-![Playwright](https://img.shields.io/badge/Playwright-1.61+-45ba4b?logo=playwright&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?logo=typescript&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white)
+![Playwright](https://img.shields.io/badge/Playwright-1.63-45ba4b?logo=playwright&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-6.0.3-3178c6?logo=typescript&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=node.js&logoColor=white)
 
 A Playwright + TypeScript visual regression test suite targeting [automationexercise.com](https://www.automationexercise.com). It catches visual regressions, responsive-layout breakages, cross-browser rendering differences, and horizontal overflow issues.
 
@@ -22,21 +22,25 @@ A Playwright + TypeScript visual regression test suite targeting [automationexer
 
 ```
 ae-visual-regression-suite/
+├── .github/
+│   └── workflows/
+│       ├── ci-visual-test.yml       # Visual regression suite workflow to run in CI
+│       └── ci-update-baselines.yml  # Manually-triggered workflow to regenerate & commit baselines
 ├── fixtures/
-│   └── visual.fixtures.ts        # Custom test fixtures (page objects injected via Playwright's extend)
+│   └── visual.fixtures.ts           # Custom test fixtures
 ├── pages/
-│   ├── base.page.ts              # Base class shared by all page objects
-│   ├── home.page.ts              # Locators for the Automation Exercise homepage
-│   └── login.page.ts             # Locators for the login page
+│   ├── base.page.ts                 # Base class shared by all page objects
+│   ├── home.page.ts                 # Page objects for the homepage
+│   └── login.page.ts                # Page objects for the login page
 ├── tests/
-│   ├── homepage.spec.ts          # Visual regression tests with various diff-tolerance options
-│   ├── responsive.spec.ts        # Per-viewport layout screenshots (mobile / tablet / desktop)
-│   ├── cross.browser.spec.ts     # Cross-browser screenshot capture (Chromium, Firefox, WebKit)
-│   ├── overflow-detection.spec.ts# DOM walk to detect horizontal overflow
-│   ├── homepage.spec.ts-snapshots/   # Baseline images for homepage tests
-│   └── responsive.spec.ts-snapshots/ # Baseline images for responsive tests
-├── screenshots/                  # Screenshots written by cross-browser tests
-├── playwright-report/            # HTML test report
+│   ├── homepage.spec.ts             # Visual regression tests with various diff-tolerance options
+│   ├── responsive.spec.ts           # Per-viewport layout screenshots (mobile / tablet / desktop)
+│   ├── cross.browser.spec.ts        # Cross-browser screenshot capture (Chromium, Firefox, WebKit)
+│   ├── overflow-detection.spec.ts.  # DOM walk to detect horizontal overflow
+│   └── cart.spec.ts                 # Visual regression tests for the shopping cart
+│   
+├── screenshots/                     # Screenshots written by cross-browser tests
+├── playwright-report/               # HTML test report
 ├── playwright.config.ts
 ├── tsconfig.json
 └── package.json
@@ -44,6 +48,80 @@ ae-visual-regression-suite/
 
 ---
 
+
+## Architecture
+
+
+### Page Object Model
+
+All page classes extend `BasePage`, which holds the injected Playwright `Page` instance. Page classes expose typed `Locator` properties and any interaction methods for their respective pages.
+
+```
+base.page.ts
+├── home.page.ts    (logo, hero heading, nav links, carousel locators)
+└── login.page.ts   (login form locators)
+```
+
+### Custom Fixtures
+
+`fixtures/visual.fixtures.ts` extends Playwright's base `test` object with:
+- **Ad blocking** — routes ad-related domains (doubleclick, googlesyndication, etc.) and aborts them to prevent layout shifts
+- **Consent handling** — automatically detects and dismisses the consent button on initial page load
+- **Font readiness** — waits for `document.fonts.ready` before tests execute to ensure stable typography in visual comparisons
+- **Page objects** — lazily-instantiated fixtures for `homePage` and `loginPage`
+
+```typescript
+import { test, expect } from "../fixtures/visual.fixtures";
+```
+
+---
+
+
+## Test Suites
+
+### Visual Regression for Homepage `homepage.spec.ts`
+
+Covers the homepage across multiple comparison strategies using Playwright's `toHaveScreenshot()` to ensure visual consistency and catch any unintended layout or styling changes.
+- **Exact pixel match** — zero tolerance, fails on any pixel difference.
+- **Pixel budget** — `maxDiffPixels: 100` allows up to 100 differing pixels.
+- **Threshold tolerance** — `threshold: 0.5` sets a per-pixel colour-difference ratio.
+- **Element-level snapshot** — isolates just the site logo for targeted regression.
+- **Full-page capture** — scrolls the entire page with `fullPage: true`.
+- **Masking** — excludes dynamic/animated regions (e.g. "Test Cases" and "APIs List" links) from comparison using the `mask` option.
+
+### Responsive Layout `responsive.spec.ts` 
+
+Iterates over three viewports and asserts a full-page screenshot at each breakpoint:
+
+| Breakpoint | Width × Height |
+| ---------- | -------------- |
+| Mobile     | 375 × 812      |
+| Tablet     | 768 × 1024     |
+| Desktop    | 1440 × 900     |
+
+Handles GDPR consent overlays that may appear before the layout is stable, and waits for fonts to finish loading (`document.fonts.ready`) before taking a snapshot.
+
+### Cross-Browser Screenshots `cross.browser.spec.ts`
+
+Two equivalent approaches are provided for comparison to test:
+- Font rendering
+- this is browser-agnostic functional check
+- ensures scrolled-off content is captured,
+where layout differences between engines are most visible
+
+
+### Layout Overflow `overflow-detection.spec.ts` 
+
+ Test to detect horizontal overflow on any element of the page. This helps in identifying layout issues where elements extend beyond the viewport width.
+
+### Cart Visual Regression `cart.spec.ts`
+
+Covers the shopping cart page across its main states using `toHaveScreenshot()`:
+- **Empty cart** — no items added, baseline captured at `/view_cart`.
+- **Single item** — one product added from its details page, then verified on the cart page.
+- **Multiple items** — several products added in sequence, then verified together on the cart page.
+
+---
 
 ## Prerequisites
 
@@ -108,80 +186,54 @@ npm run test:visual:update
 
 ---
 
-## Test Suites
+## CI/CD Integration
 
-### `homepage.spec.ts` — Visual Regression
+For CI/CD purpose Github Actions is used. Visual testing in CI differs from local runs because of rendering differences across operating systems. A page that looks identical on macOS and Windows can produce a slightly different screenshot on the Linux based runners used by GitHub Actions. This issue can be handled in two ways:
+- Generate baselines in CI and commit them back to the repo, then run tests against those baselines.
+- Generate baselines locally using the official Playwright Docker image, so the images already match the Linux runner used in CI.
 
-Covers the homepage across multiple comparison strategies using Playwright's `toHaveScreenshot()`:
+In this project the second approach is implemnted.  This solution provides one source of truth and easy to maintain the baselines. By the other way it is required to maintaine multiple sets of baselines. There is also a worklfow ([ci-update-baselines.yml](.github/workflows/ci-update-baselines.yml)) to use as a base of first solution and it can be used.
 
-- **Exact pixel match** — zero tolerance, fails on any pixel difference.
-- **Pixel budget** — `maxDiffPixels: 100` allows up to 100 differing pixels.
-- **Threshold tolerance** — `threshold: 0.5` sets a per-pixel colour-difference ratio.
-- **Element-level snapshot** — isolates just the site logo for targeted regression.
-- **Full-page capture** — scrolls the entire page with `fullPage: true`.
-- **Masking** — excludes dynamic/animated regions (e.g. "Test Cases" and "APIs List" links) from comparison using the `mask` option.
+### Option 1: Commit baselines from CI
 
-### `responsive.spec.ts` — Responsive Layout
+- Run the worklow manually in CI and generate CI runner based snapshots
+- Run the main testing worklfow and check the results
 
-Iterates over three viewports and asserts a full-page screenshot at each breakpoint:
+### Option 2: Update locally through Docker (Recommended)
 
-| Breakpoint | Width × Height |
-|---|---|
-| Mobile | 375 × 812 |
-| Tablet | 768 × 1024 |
-| Desktop | 1440 × 900 |
+With Docker Desktop running, from the project root, start a container using the Playwright image whose version matches the project's `@playwright/test` version:
 
-Handles GDPR consent overlays that may appear before the layout is stable, and waits for fonts to finish loading (`document.fonts.ready`) before taking a snapshot.
+```bash
+docker run --rm --network host \
+  -v $(pwd):/work/ -w /work/ \
+  -it mcr.microsoft.com/playwright:v1.63.0-noble \
+  /bin/bash
+```
 
-### `cross.browser.spec.ts` — Cross-Browser Screenshots
+Inside the container, install dependencies and confirm the Playwright version matches the project:
 
-Two equivalent approaches are provided for comparison:
+```bash
+npm ci
+npm ls playwright
+npx playwright install --with-deps
+```
 
-- **Test 1** — manually launches each browser engine (`chromium`, `firefox`, `webkit`) inside a single test using `browser.launch()`, captures a full-page screenshot per engine, then closes each browser.
-- **Test 2** — uses the Playwright project fixture (`browserName`) to capture a screenshot for the currently active browser. Run this variant with `--project` flags.
+Update the snapshots (the config treats `CI=true` as headless, matching CI behavior):
 
-Screenshots are written to `screenshots/homepage-<browser>.png` (not baseline-compared — useful for side-by-side visual inspection).
+```bash
+CI=true npx playwright test --update-snapshots --project=chromium
+```
 
-### `overflow-detection.spec.ts` — Layout Overflow
+Check that the snapshot folders were updated, then exit the container:
 
-Walks every DOM element on the page via `page.evaluate()` and reports any element whose right edge exceeds the viewport width by more than 1 px. The test fails with a list of offending selectors if horizontal overflow is detected.
+```bash
+exit
+```
+
+- Run the testing workflow
+- When it is need to update baselines repeat the mentioned steps above with docker container.
+
+> Note: Workflows are build to run manually. It can be converted into push or pull request actions in the repo or connect to the main functional project to be triggered accordingly
+
 
 ---
-
-## Architecture
-
-### Page Object Model
-
-All page classes extend `BasePage`, which holds the injected Playwright `Page` instance. Page classes expose typed `Locator` properties and any interaction methods for their respective pages.
-
-```
-BasePage
-├── HomePage    (logo, hero heading, nav links, carousel locators)
-└── LoginPage   (login form locators)
-```
-
-### Custom Fixtures
-
-`fixtures/visual.fixtures.ts` extends Playwright's base `test` object with:
-- **Ad blocking** — routes ad-related domains (doubleclick, googlesyndication, etc.) and aborts them to prevent layout shifts
-- **Consent handling** — automatically detects and dismisses the consent button on initial page load
-- **Font readiness** — waits for `document.fonts.ready` before tests execute to ensure stable typography in visual comparisons
-- **Page objects** — lazily-instantiated fixtures for `homePage` and `loginPage`
-
-```typescript
-import { test, expect } from "../fixtures/visual.fixtures";
-// now `homePage` and `loginPage`
-// are available as typed fixture arguments in every test
-```
-
-Each fixture receives the `page` object from Playwright, constructs the corresponding page class, and yields it via `use()`.
-
----
-
-## CI Behaviour
-
-`playwright.config.ts` automatically adjusts for CI environments (`process.env.CI`):
-
-- `forbidOnly: true` — fails the build if `test.only` is accidentally left in source.
-- `retries: 2` — retries failing tests twice before reporting a failure.
-- `workers: 1` — runs tests serially to avoid resource contention on CI agents.

@@ -1,5 +1,10 @@
-// tests/visual/layout/overflow-detection.spec.ts
+
 import { test, expect } from "@playwright/test";
+
+/*
+ * Test to detect horizontal overflow on any element of the page.
+ * This helps in identifying layout issues where elements extend beyond the viewport width.
+ */
 
 test("no horizontal overflow on any element", async ({ page }) => {
   await page.goto("/");
